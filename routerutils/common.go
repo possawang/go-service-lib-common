@@ -13,8 +13,8 @@ import (
 )
 
 type Endpoint struct {
-	Eksekusi func(w http.ResponseWriter, r *http.Request)
-	Method   string
+	Execution func(w http.ResponseWriter, r *http.Request)
+	Method    string
 }
 
 func StartingService(endpoints map[string]Endpoint) {
@@ -25,7 +25,7 @@ func StartingService(endpoints map[string]Endpoint) {
 	r := mux.NewRouter()
 	var methods []string
 	for url, endpoint := range endpoints {
-		r.HandleFunc(url, endpoint.Eksekusi).Methods(endpoint.Method)
+		r.HandleFunc(url, endpoint.Execution).Methods(endpoint.Method)
 		if !commonutils.ArrayExists(methods, func(v string) bool { return v == endpoint.Method }) {
 			methods = append(methods, endpoint.Method)
 		}

@@ -17,12 +17,15 @@ type Endpoint struct {
 	Method    string
 }
 
-func StartingService(endpoints map[string]Endpoint) {
+func StartingService(endpoints map[string]Endpoint, mdw mux.MiddlewareFunc) {
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
 	}
 	r := mux.NewRouter()
+	if mdw != nil {
+		r.Use(mdw)
+	}
 	var methods []string
 	for url, endpoint := range endpoints {
 		r.HandleFunc(url, endpoint.Execution).Methods(endpoint.Method)
@@ -31,8 +34,9 @@ func StartingService(endpoints map[string]Endpoint) {
 		}
 	}
 	port, path, headers, origins := os.Getenv("SERVICE.PORT"), os.Getenv("CONTEXT.PATH"), os.Getenv("ALLOWED.HEADERS"), os.Getenv("ORIGINS")
+	r.Path(path)
 	log.Fatal(
-		http.ListenAndServe(":"+port+path,
+		http.ListenAndServe(":"+port,
 			handlers.CORS(
 				handlers.ExposedHeaders(strings.Split(headers, ",")),
 				handlers.AllowedMethods(methods),

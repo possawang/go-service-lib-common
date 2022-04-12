@@ -18,13 +18,14 @@ type Endpoint struct {
 	Mdw       func(r http.Handler) http.Handler
 }
 
-func StartingService(endpoints map[string]Endpoint) {
+func StartingService(endpoints map[string]Endpoint, mdw func(h http.Handler) http.Handler) {
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
 	}
 	path := os.Getenv("CONTEXT.PATH")
 	r := mux.NewRouter().PathPrefix(path).Subrouter()
+	r.Use(mdw)
 	var methods []string
 	for url, endpoint := range endpoints {
 		sr := r.PathPrefix(url).Subrouter()
